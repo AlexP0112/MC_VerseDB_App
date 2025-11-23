@@ -1,0 +1,14 @@
+VerseDB - an Android app to browse a large database of poems
+
+Mobile Computing project, 2025:
+- Dumitrescu Alexandra
+- Girlea Anana
+- Podaru Andrei-Alexandru
+
+Group SCPD2
+
+Tech stack:
+- Kotlin
+- Jetpack Compose
+- Retrofit
+- Room
