@@ -7,7 +7,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
@@ -21,10 +20,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.alex.versedb.ui.screens.FavoritesScreen
+import com.alex.versedb.ui.screens.SearchScreen
 import com.alex.versedb.ui.theme.VerseDBTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,15 +41,14 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@PreviewScreenSizes
 @Composable
 fun VerseDBApp() {
+    val navController = rememberNavController()
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
-            AppDestinations.entries.forEach {
-                item(
+            AppDestinations.entries.forEach {                item(
                     icon = {
                         Icon(
                             it.icon,
@@ -53,41 +56,36 @@ fun VerseDBApp() {
                         )
                     },
                     label = { Text(it.label) },
-                    selected = it == currentDestination,
-                    onClick = { currentDestination = it }
+                    selected = it.route == currentDestination.route,
+                    onClick = { 
+                        currentDestination = it
+                        navController.navigate(it.route)
+                    }
                 )
             }
         }
-    ) {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Greeting(
-                name = "Android",
+    ) {        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            NavHost(
+                navController = navController,
+                startDestination = AppDestinations.HOME.route,
                 modifier = Modifier.padding(innerPadding)
-            )
+            ) {
+                composable(AppDestinations.HOME.route) {
+                    SearchScreen()
+                }
+                composable(AppDestinations.FAVORITES.route) {
+                    FavoritesScreen()
+                }
+            }
         }
     }
 }
 
 enum class AppDestinations(
+    val route: String,
     val label: String,
     val icon: ImageVector,
 ) {
-    HOME("Home", Icons.Default.Home),
-    FAVORITES("Favorites", Icons.Default.Favorite)
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    VerseDBTheme {
-        Greeting("Android")
-    }
+    HOME("home", "Home", Icons.Default.Home),
+    FAVORITES("favorites", "Favorites", Icons.Default.Favorite)
 }
